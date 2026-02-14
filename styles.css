@@ -1,0 +1,16 @@
+/* Базовые стили — расширяются в следующих этапах */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 1rem;
+}

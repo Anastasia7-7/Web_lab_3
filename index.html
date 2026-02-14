@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2048</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="title">2048</h1>
+      <div class="scores">
+        <div class="score-block">
+          <span class="score-label">Очки</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="game-wrapper">
+        <div class="game-container" id="game-container">
+          <div class="grid" id="grid" role="grid" aria-label="Игровое поле 2048">
+            <!-- ячейки сетки 4x4 заполняются через JS -->
+          </div>
+          <div class="tiles-container" id="tiles-container">
+            <!-- плитки (тайлы) рисуются через JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-mobile" id="controls-mobile" aria-hidden="true">
+        <button type="button" class="control-btn control-up" id="btn-up" aria-label="Вверх">↑</button>
+        <button type="button" class="control-btn control-left" id="btn-left" aria-label="Влево">←</button>
+        <button type="button" class="control-btn control-down" id="btn-down" aria-label="Вниз">↓</button>
+        <button type="button" class="control-btn control-right" id="btn-right" aria-label="Вправо">→</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" id="btn-undo" disabled>Отмена хода</button>
+        <button type="button" class="btn btn-primary" id="btn-new-game">Новая игра</button>
+        <button type="button" class="btn btn-secondary" id="btn-leaders">Таблица лидеров</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Модальное окно окончания игры -->
+  <div class="modal-overlay" id="modal-game-over" hidden>
+    <div class="modal modal-game-over">
+      <p class="modal-message" id="game-over-message">Игра окончена. Введите имя для сохранения результата.</p>
+      <div class="modal-form" id="game-over-form">
+        <input type="text" class="input-name" id="input-player-name" placeholder="Ваше имя" maxlength="30" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="btn-save-result">Сохранить результат</button>
+      </div>
+      <p class="modal-message modal-message-success" id="game-over-success" hidden>Ваш рекорд сохранён.</p>
+      <button type="button" class="btn btn-icon" id="btn-restart" aria-label="Начать заново">↻</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно таблицы лидеров -->
+  <div class="modal-overlay" id="modal-leaders" hidden>
+    <div class="modal modal-leaders">
+      <h2 class="modal-title">Таблица лидеров</h2>
+      <div class="leaders-table-wrapper">
+        <table class="leaders-table">
+          <thead>
+            <tr>
+              <th>Имя</th>
+              <th>Очки</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+          <tbody id="leaders-body">
+            <!-- строки заполняются через JS -->
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-close-leaders">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
