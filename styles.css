@@ -248,3 +248,57 @@ body {
 .modal-game-over .btn-restart {
   margin-top: 0.5rem;
 }
+
+/* Модальное окно таблицы лидеров */
+.modal-title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: #776e65;
+  text-align: center;
+}
+
+.modal-leaders {
+  max-width: 480px;
+}
+
+.leaders-table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.leaders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.leaders-table th,
+.leaders-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #bbada0;
+}
+
+.leaders-table th {
+  background: #bbada0;
+  color: #f9f6f2;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+}
+
+.leaders-table tbody tr:nth-child(even) {
+  background: rgba(238, 228, 218, 0.5);
+}
+
+.leaders-table tbody tr:hover {
+  background: rgba(238, 228, 218, 0.8);
+}
+
+.modal-leaders .btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
