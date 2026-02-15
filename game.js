@@ -178,6 +178,65 @@
     grid[cell.r][cell.c] = value;
   }
 
+  /** Появление 1 или 2 новых плиток на случайных пустых клетках */
+  function spawnTilesAfterMove() {
+    var count = Math.random() < 0.5 ? 1 : 2;
+    for (var i = 0; i < count; i++) {
+      spawnTile();
+    }
+  }
+
+  /** Есть ли хотя бы один возможный ход (пустая клетка или соседние равные) */
+  function canMove() {
+    var empty = getEmptyCells();
+    if (empty.length > 0) return true;
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var v = grid[r][c];
+        if (v === 0) continue;
+        if (c + 1 < SIZE && grid[r][c + 1] === v) return true;
+        if (r + 1 < SIZE && grid[r + 1][c] === v) return true;
+      }
+    }
+    return false;
+  }
+
+  function showGameOverModal() {
+    var overlay = document.getElementById('modal-game-over');
+    var form = document.getElementById('game-over-form');
+    var message = document.getElementById('game-over-message');
+    var success = document.getElementById('game-over-success');
+    if (overlay) overlay.hidden = false;
+    if (form) form.style.display = '';
+    if (message) message.hidden = false;
+    if (success) success.hidden = true;
+  }
+
+  function hideGameOverModal() {
+    var overlay = document.getElementById('modal-game-over');
+    if (overlay) overlay.hidden = true;
+  }
+
+  function setGameOverModalSaved() {
+    var form = document.getElementById('game-over-form');
+    var message = document.getElementById('game-over-message');
+    var success = document.getElementById('game-over-success');
+    if (form) form.style.display = 'none';
+    if (message) message.hidden = true;
+    if (success) success.hidden = false;
+  }
+
+  function resetGameOverModalState() {
+    var form = document.getElementById('game-over-form');
+    var message = document.getElementById('game-over-message');
+    var success = document.getElementById('game-over-success');
+    var input = document.getElementById('input-player-name');
+    if (form) form.style.display = '';
+    if (message) message.hidden = false;
+    if (success) success.hidden = true;
+    if (input) input.value = '';
+  }
+
   function getTileClass(value) {
     if (value <= 2048) return 'tile tile-' + value;
     return 'tile tile-super';
@@ -214,10 +273,22 @@
     grid = createEmptyGrid();
     score = 0;
     gameOver = false;
+    hideGameOverModal();
+    resetGameOverModalState();
     spawnTile();
     spawnTile();
     updateScoreDisplay();
     renderTiles();
+  }
+
+  function afterMove() {
+    spawnTilesAfterMove();
+    updateScoreDisplay();
+    renderTiles();
+    if (!canMove()) {
+      gameOver = true;
+      showGameOverModal();
+    }
   }
 
   function onKeyDown(e) {
@@ -228,11 +299,7 @@
     else if (key === 'ArrowRight') moved = moveRight();
     else if (key === 'ArrowUp') moved = moveUp();
     else if (key === 'ArrowDown') moved = moveDown();
-    if (moved) {
-      spawnTile();
-      updateScoreDisplay();
-      renderTiles();
-    }
+    if (moved) afterMove();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -240,5 +307,18 @@
     document.addEventListener('keydown', onKeyDown);
     var btnNewGame = document.getElementById('btn-new-game');
     if (btnNewGame) btnNewGame.addEventListener('click', startNewGame);
+
+    var btnSaveResult = document.getElementById('btn-save-result');
+    if (btnSaveResult) {
+      btnSaveResult.addEventListener('click', function () {
+        setGameOverModalSaved();
+      });
+    }
+    var btnRestart = document.getElementById('btn-restart');
+    if (btnRestart) {
+      btnRestart.addEventListener('click', function () {
+        startNewGame();
+      });
+    }
   });
 })();
