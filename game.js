@@ -6,6 +6,7 @@
   var GRID_GAP = 8;
   var GRID_PADDING = 8;
   var STORAGE_KEY = 'game2048_state';
+  var LEADERS_STORAGE_KEY = 'game2048_leaders';
 
   var grid = [];
   var score = 0;
@@ -16,6 +17,9 @@
   var tilesContainer = document.getElementById('tiles-container');
   var gameContainer = document.getElementById('game-container');
   var btnUndo = document.getElementById('btn-undo');
+  var controlsMobile = document.getElementById('controls-mobile');
+  var modalGameOver = document.getElementById('modal-game-over');
+  var modalLeaders = document.getElementById('modal-leaders');
 
   function createEmptyGrid() {
     var g = [];
@@ -213,11 +217,13 @@
     if (form) form.style.display = '';
     if (message) message.hidden = false;
     if (success) success.hidden = true;
+    updateMobileControlsVisibility();
   }
 
   function hideGameOverModal() {
     var overlay = document.getElementById('modal-game-over');
     if (overlay) overlay.hidden = true;
+    updateMobileControlsVisibility();
   }
 
   function setGameOverModalSaved() {
@@ -238,6 +244,80 @@
     if (message) message.hidden = false;
     if (success) success.hidden = true;
     if (input) input.value = '';
+  }
+
+  function getLeaders() {
+    try {
+      var raw = localStorage.getItem(LEADERS_STORAGE_KEY);
+      if (!raw) return [];
+      var list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLeaders(list) {
+    try {
+      localStorage.setItem(LEADERS_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  function addLeader(name, playerScore) {
+    var leaders = getLeaders();
+    var trimmed = (name || '').trim() || 'Игрок';
+    var date = new Date();
+    var dateStr = date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    leaders.push({ name: trimmed, score: playerScore, date: dateStr });
+    leaders.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+    if (leaders.length > 100) leaders = leaders.slice(0, 100);
+    saveLeaders(leaders);
+  }
+
+  function renderLeadersTable() {
+    var tbody = document.getElementById('leaders-body');
+    if (!tbody) return;
+    var leaders = getLeaders();
+    tbody.innerHTML = '';
+    leaders.forEach(function (entry) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + escapeHtml(entry.name) + '</td><td>' + (entry.score || 0) + '</td><td>' + escapeHtml(entry.date || '') + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function showLeadersModal() {
+    renderLeadersTable();
+    if (modalLeaders) modalLeaders.hidden = false;
+    updateMobileControlsVisibility();
+  }
+
+  function hideLeadersModal() {
+    if (modalLeaders) modalLeaders.hidden = true;
+    updateMobileControlsVisibility();
+  }
+
+  function updateMobileControlsVisibility() {
+    if (!controlsMobile) return;
+    var gameOverOpen = modalGameOver && !modalGameOver.hidden;
+    var leadersOpen = modalLeaders && !modalLeaders.hidden;
+    var anyModalOpen = gameOverOpen || leadersOpen;
+    var isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (anyModalOpen) {
+      controlsMobile.classList.add('controls-mobile--hidden');
+      controlsMobile.classList.remove('controls-mobile--visible');
+    } else if (isMobile) {
+      controlsMobile.classList.remove('controls-mobile--hidden');
+      controlsMobile.classList.add('controls-mobile--visible');
+    } else {
+      controlsMobile.classList.remove('controls-mobile--visible', 'controls-mobile--hidden');
+    }
   }
 
   function getTileClass(value) {
@@ -333,6 +413,7 @@
     updateScoreDisplay();
     updateUndoButton();
     if (gameOver) showGameOverModal();
+    updateMobileControlsVisibility();
   }
 
   function startNewGame() {
@@ -348,6 +429,7 @@
     renderTiles();
     updateUndoButton();
     saveState();
+    updateMobileControlsVisibility();
   }
 
   function afterMove() {
@@ -362,29 +444,36 @@
     saveState();
   }
 
-  function onKeyDown(e) {
+  function doMove(direction) {
     if (gameOver) return;
-    var key = e.key;
     var moved = false;
-    if (key === 'ArrowLeft') {
+    if (direction === 'left') {
       pushState();
       moved = moveLeft();
       if (!moved) undoHistory.pop();
-    } else if (key === 'ArrowRight') {
+    } else if (direction === 'right') {
       pushState();
       moved = moveRight();
       if (!moved) undoHistory.pop();
-    } else if (key === 'ArrowUp') {
+    } else if (direction === 'up') {
       pushState();
       moved = moveUp();
       if (!moved) undoHistory.pop();
-    } else if (key === 'ArrowDown') {
+    } else if (direction === 'down') {
       pushState();
       moved = moveDown();
       if (!moved) undoHistory.pop();
     }
     if (moved) afterMove();
     updateUndoButton();
+  }
+
+  function onKeyDown(e) {
+    var key = e.key;
+    if (key === 'ArrowLeft') doMove('left');
+    else if (key === 'ArrowRight') doMove('right');
+    else if (key === 'ArrowUp') doMove('up');
+    else if (key === 'ArrowDown') doMove('down');
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -402,14 +491,29 @@
     var btnSaveResult = document.getElementById('btn-save-result');
     if (btnSaveResult) {
       btnSaveResult.addEventListener('click', function () {
+        var input = document.getElementById('input-player-name');
+        var name = input ? input.value : '';
+        addLeader(name, score);
         setGameOverModalSaved();
       });
     }
     var btnRestart = document.getElementById('btn-restart');
-    if (btnRestart) {
-      btnRestart.addEventListener('click', function () {
-        startNewGame();
-      });
-    }
+    if (btnRestart) btnRestart.addEventListener('click', startNewGame);
+
+    var btnLeaders = document.getElementById('btn-leaders');
+    if (btnLeaders) btnLeaders.addEventListener('click', showLeadersModal);
+    var btnCloseLeaders = document.getElementById('btn-close-leaders');
+    if (btnCloseLeaders) btnCloseLeaders.addEventListener('click', hideLeadersModal);
+
+    var btnUp = document.getElementById('btn-up');
+    var btnLeft = document.getElementById('btn-left');
+    var btnDown = document.getElementById('btn-down');
+    var btnRight = document.getElementById('btn-right');
+    if (btnUp) btnUp.addEventListener('click', function () { doMove('up'); });
+    if (btnLeft) btnLeft.addEventListener('click', function () { doMove('left'); });
+    if (btnDown) btnDown.addEventListener('click', function () { doMove('down'); });
+    if (btnRight) btnRight.addEventListener('click', function () { doMove('right'); });
+
+    updateMobileControlsVisibility();
   });
 })();
