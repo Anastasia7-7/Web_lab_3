@@ -329,7 +329,11 @@
     if (!tilesContainer || !gameContainer) return;
     var w = gameContainer.offsetWidth;
     var inner = w - GRID_PADDING * 2 - GRID_GAP * 3;
-    var cellSize = inner / SIZE;
+    var cellSize = Math.floor(inner / SIZE);
+
+    var baseFontSize = Math.max(10, Math.min(Math.floor(cellSize * 0.5), 56));
+    var midFontSize = Math.max(9, Math.min(Math.floor(cellSize * 0.4), 42));
+    var smallFontSize = Math.max(8, Math.min(Math.floor(cellSize * 0.3), 32));
 
     tilesContainer.innerHTML = '';
     for (var r = 0; r < SIZE; r++) {
@@ -343,6 +347,13 @@
         tile.style.top = (GRID_PADDING + r * (cellSize + GRID_GAP)) + 'px';
         tile.style.width = cellSize + 'px';
         tile.style.height = cellSize + 'px';
+        if (value >= 1024) {
+          tile.style.fontSize = smallFontSize + 'px';
+        } else if (value >= 128) {
+          tile.style.fontSize = midFontSize + 'px';
+        } else {
+          tile.style.fontSize = baseFontSize + 'px';
+        }
         tilesContainer.appendChild(tile);
       }
     }
@@ -515,5 +526,13 @@
     if (btnRight) btnRight.addEventListener('click', function () { doMove('right'); });
 
     updateMobileControlsVisibility();
+
+    var resizeTimeout;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function () {
+        renderTiles();
+      }, 100);
+    });
   });
 })();
