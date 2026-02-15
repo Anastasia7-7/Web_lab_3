@@ -5,6 +5,7 @@
   var SIZE = 4;
   var GRID_GAP = 8;
   var GRID_PADDING = 8;
+  var STORAGE_KEY = 'game2048_state';
 
   var grid = [];
   var score = 0;
@@ -283,12 +284,55 @@
     renderTiles();
     updateScoreDisplay();
     updateUndoButton();
+    saveState();
   }
 
   function updateUndoButton() {
     if (btnUndo) {
       btnUndo.disabled = gameOver || undoHistory.length === 0;
     }
+  }
+
+  function saveState() {
+    try {
+      var state = {
+        grid: copyGrid(grid),
+        score: score,
+        gameOver: gameOver,
+        undoHistory: undoHistory.map(function (s) { return { grid: copyGrid(s.grid), score: s.score }; })
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var state = JSON.parse(raw);
+      if (!state || !state.grid || state.grid.length !== SIZE) return null;
+      for (var r = 0; r < SIZE; r++) {
+        if (!state.grid[r] || state.grid[r].length !== SIZE) return null;
+      }
+      if (typeof state.score !== 'number' || state.score < 0) return null;
+      if (!Array.isArray(state.undoHistory)) state.undoHistory = [];
+      return state;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function restoreState(state) {
+    grid = state.grid;
+    score = state.score;
+    gameOver = state.gameOver === true;
+    undoHistory = state.undoHistory || [];
+    hideGameOverModal();
+    resetGameOverModalState();
+    renderTiles();
+    updateScoreDisplay();
+    updateUndoButton();
+    if (gameOver) showGameOverModal();
   }
 
   function startNewGame() {
@@ -303,6 +347,7 @@
     updateScoreDisplay();
     renderTiles();
     updateUndoButton();
+    saveState();
   }
 
   function afterMove() {
@@ -314,6 +359,7 @@
       gameOver = true;
       showGameOverModal();
     }
+    saveState();
   }
 
   function onKeyDown(e) {
@@ -342,7 +388,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    startNewGame();
+    var saved = loadState();
+    if (saved) {
+      restoreState(saved);
+    } else {
+      startNewGame();
+    }
     document.addEventListener('keydown', onKeyDown);
     var btnNewGame = document.getElementById('btn-new-game');
     if (btnNewGame) btnNewGame.addEventListener('click', startNewGame);
