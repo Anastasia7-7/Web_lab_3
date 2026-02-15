@@ -9,10 +9,12 @@
   var grid = [];
   var score = 0;
   var gameOver = false;
+  var undoHistory = [];
 
   var scoreEl = document.getElementById('score');
   var tilesContainer = document.getElementById('tiles-container');
   var gameContainer = document.getElementById('game-container');
+  var btnUndo = document.getElementById('btn-undo');
 
   function createEmptyGrid() {
     var g = [];
@@ -269,22 +271,45 @@
     if (scoreEl) scoreEl.textContent = score;
   }
 
+  function pushState() {
+    undoHistory.push({ grid: copyGrid(grid), score: score });
+  }
+
+  function undo() {
+    if (gameOver || undoHistory.length === 0) return;
+    var state = undoHistory.pop();
+    grid = state.grid;
+    score = state.score;
+    renderTiles();
+    updateScoreDisplay();
+    updateUndoButton();
+  }
+
+  function updateUndoButton() {
+    if (btnUndo) {
+      btnUndo.disabled = gameOver || undoHistory.length === 0;
+    }
+  }
+
   function startNewGame() {
     grid = createEmptyGrid();
     score = 0;
     gameOver = false;
+    undoHistory = [];
     hideGameOverModal();
     resetGameOverModalState();
     spawnTile();
     spawnTile();
     updateScoreDisplay();
     renderTiles();
+    updateUndoButton();
   }
 
   function afterMove() {
     spawnTilesAfterMove();
     updateScoreDisplay();
     renderTiles();
+    updateUndoButton();
     if (!canMove()) {
       gameOver = true;
       showGameOverModal();
@@ -295,11 +320,25 @@
     if (gameOver) return;
     var key = e.key;
     var moved = false;
-    if (key === 'ArrowLeft') moved = moveLeft();
-    else if (key === 'ArrowRight') moved = moveRight();
-    else if (key === 'ArrowUp') moved = moveUp();
-    else if (key === 'ArrowDown') moved = moveDown();
+    if (key === 'ArrowLeft') {
+      pushState();
+      moved = moveLeft();
+      if (!moved) undoHistory.pop();
+    } else if (key === 'ArrowRight') {
+      pushState();
+      moved = moveRight();
+      if (!moved) undoHistory.pop();
+    } else if (key === 'ArrowUp') {
+      pushState();
+      moved = moveUp();
+      if (!moved) undoHistory.pop();
+    } else if (key === 'ArrowDown') {
+      pushState();
+      moved = moveDown();
+      if (!moved) undoHistory.pop();
+    }
     if (moved) afterMove();
+    updateUndoButton();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -307,6 +346,7 @@
     document.addEventListener('keydown', onKeyDown);
     var btnNewGame = document.getElementById('btn-new-game');
     if (btnNewGame) btnNewGame.addEventListener('click', startNewGame);
+    if (btnUndo) btnUndo.addEventListener('click', undo);
 
     var btnSaveResult = document.getElementById('btn-save-result');
     if (btnSaveResult) {
