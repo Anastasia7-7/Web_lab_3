@@ -302,3 +302,140 @@ body {
   width: 100%;
   text-align: center;
 }
+
+/* Мобильные кнопки управления (только на малых экранах; скрыты при открытых модалках — через JS) */
+.controls-mobile {
+  display: none;
+  width: 140px;
+  height: 140px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.controls-mobile.controls-mobile--visible {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 4px;
+}
+
+.control-btn {
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #8f7a66;
+  color: #f9f6f2;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.control-btn:hover,
+.control-btn:active {
+  background: #9f8a76;
+}
+
+.control-up   { grid-column: 2; grid-row: 1; }
+.control-left { grid-column: 1; grid-row: 2; }
+.control-down { grid-column: 2; grid-row: 3; }
+.control-right { grid-column: 3; grid-row: 2; }
+
+.controls-mobile.controls-mobile--hidden {
+  display: none !important;
+}
+
+/* Адаптив: планшеты и смартфоны */
+@media (max-width: 768px) {
+  .app {
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .game-wrapper {
+    max-width: 100%;
+  }
+
+  .tile {
+    font-size: 1.5rem;
+  }
+
+  .tile-128, .tile-256, .tile-512 {
+    font-size: 1.2rem;
+  }
+
+  .tile-1024, .tile-2048 {
+    font-size: 0.9rem;
+  }
+
+  .tile-super {
+    font-size: 0.75rem;
+  }
+
+  .actions {
+    gap: 0.4rem;
+  }
+
+  .btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .modal {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+
+  .leaders-table {
+    font-size: 0.85rem;
+  }
+
+  .leaders-table th,
+  .leaders-table td {
+    padding: 0.4rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .tile {
+    font-size: 1.25rem;
+  }
+
+  .tile-128, .tile-256, .tile-512 {
+    font-size: 1rem;
+  }
+
+  .tile-1024, .tile-2048 {
+    font-size: 0.75rem;
+  }
+
+  .tile-super {
+    font-size: 0.65rem;
+  }
+}
+
+/* Десктоп: мобильные кнопки скрыты (управление стрелками) */
+@media (min-width: 769px) {
+  .controls-mobile {
+    display: none !important;
+  }
+}
