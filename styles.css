@@ -182,3 +182,69 @@ body {
 .btn-icon:hover {
   background: #9f8a76;
 }
+
+/* Модальное окно окончания игры */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal {
+  background: #faf8ef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-game-over {
+  text-align: center;
+}
+
+.modal-message {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #776e65;
+}
+
+.modal-message-success {
+  margin: 0 0 1rem;
+  color: #5d9c59;
+  font-weight: bold;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.input-name {
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 2px solid #bbada0;
+  border-radius: 4px;
+  font-family: inherit;
+  color: #776e65;
+}
+
+.input-name:focus {
+  outline: none;
+  border-color: #8f7a66;
+}
+
+.modal-game-over .btn-restart {
+  margin-top: 0.5rem;
+}
